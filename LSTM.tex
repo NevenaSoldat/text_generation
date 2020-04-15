@@ -203,7 +203,39 @@ Generisanje prirodnog jezika (eng. Natural Language Generation - NLG) se intenzi
 
 Ovaj rad bavi se automatskim generisanjem teksta na nivou reči. Podaci koje koristimo sadrže kratke opise filmova, preuzete sa vikipedije (mogu se preuzeti sa adrese: \url{https://www.kaggle.com/jrobischon/wikipedia-movie-plots}). Cilj je da se dobije kratak opis neke radnje filma, sa zadatim ulaznim tekstom. Ne očekujemo da rezultati budu precizni, bitno je da predviđeni tekst bude čitljiv.
 
+Generisanje teksta vrši se tako da za datu početnu sekvencu teksta mreža predviđa sledeću reč, a zatim na osnovu novodobijene reči ponovo predviđa novu reč sve dok ne izgeneriše traženi broj reči. Faze rešavanja problema su sledeće:
+\begin{itemize}
+    \item Preprocesiranje ulaznih podataka
+    \item Kreiranje i treniranje modela
+    \item Generisanje teksta
+\end{itemize}
 
+
+\subsection{Preprocesiranje ulaznih podataka}
+
+Ulazni podaci su preuzeti iz baze podataka koja sadrži radnje filmova. Na slučajan način biramo 200 filmova. Različiti filmovi imaju različite i radnje, pa je potrebno da model prvo razume reči i kontekst svake radnje.
+
+Prvi korak u svim projektima koji podrazumevaju korišćenje reči prirodnog jezika je uklanjanje stop \footnote{ovo su uglavnom veznici, kao i reči koje su veoma učestale i koje iz tog razloga ometaju istraživanje} reči. Ipak, nama je cilj generisanje teksta koji će ličiti na povezanu priču, te nam je potrebno da sačuvamo sve reči. Naredni koraci u obradi teksta podrazumevaju:
+\begin{itemize}
+    \item konvertovanje svih slova u male
+    \item uklanjanje znakova interpunkcije, kao i ostalih netipičnih karaktera
+    \item uklanjanje belina
+    \item ...
+\end{itemize}
+
+Dodatno, neuronske mreže ne mogu da rade sa rečima, te tekstualne podatke kodiramo kao brojeve koji će predstavljati ulaz, odnosno izlaz iz mreže. Tokenizer API iz biblioteke keras obavlja ovaj posao za nas. Naime, pozivom funkcije fit\_on\_texts obrađuje se tekst na gorenaveden način, i kreira se rečnik čiji su ključevi reči, a vrednosti brojevi koji su im dodeljeni.
+
+\subsection{Kreiranje i treniranje modela}
+
+Za trening mreže koristimo tokenizovane reči, sakupljene iz sadržaja 200 filmova. Broj tokena iznosi 10806. Ulazni podaci su sekvence dužine 20 reči, a izlazni naredne reči. Mreža se sastoji iz ulaznog sloja (eng. Embedding layer), LSTM sloja, i izlaznog sloja. Izlazni sloj koristi softmax funkciju aktivacije. Funkcija gubitka je cross-entropy. Trening se izvršava u 100 epoha. Radi efikasnijeg treninga, koristimo tehniku slučajnog odbacivanja pojedinih veza (dropout) i Adam optimizator.
+
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[scale=0.6]{model.png}
+    \caption{Konfiguracija modela}
+    \label{fig:lstm10}
+\end{figure}
 
 
 \section{Zaključak}

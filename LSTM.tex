@@ -76,6 +76,14 @@ Neuronske mreže (eng. neural networks) predstavljaju najpopularniju i jednu od 
 
 Osnovna ideja veštačke neuronske mreže je simulacija velike količine gusto napakovanih, međusobno  povezanih nervnih  ćelija u okviru računara, tako da je omogućeno učenje pojmova, prepoznavanje šablona i donošenje odluka na način koji je sličan čovekovom. Suštinski, veštačke neuronske mreže su softverske simulacije, napravljene programirajući obične računare koji rade u uobičajenom režimu sa svojim tranzistorima i serijski povezanim logičkim  kolima, tako da se ponašaju kao da su napravljene od milijardu međusobno povezanih ćelija mozga koje rade paralelno. 
 
+\subsection{Opis rada}
+
+U ovom radu je implementirana rekurentna neuronska mreža koja automatski generiše određeni tekst. Podaci koje koristimo predstavljaju kratke opise filmova. Cilj nam je da za određenu sekvencu reči uspemo da pretpostavimo koja će biti sledeća. Korišćena je posebna verzija rekurentne mreže koja ume da pamti duge sekvence - kratka dugoročna memorija (eng. Long Short Term Memory - LSTM). 
+
+Mnogi radovi bave se automatskim generisanjem teksta. Rad koji je sličan našem opisuje automatsko generisanje kratkih priča na nivou generisanja pojedinačnih reči  \cite{pawade2018story}. Automatsko generisanje teksta može biti implementirano i na nivou karaktera, što je opisano u radu \cite{sutskever2011generating}.
+
+LSTM mreže koriste se za razne probleme nad sekvencijalnim podacima. Tako imamo radove koji se bave automatskim generisanjem reči pesama \cite{potash2015ghostwriter}, ili čak automatskim komponovanjem muzike \cite{choi2016text}.
+
 \section{Rekurentne neuronske mreže}
 Rekurentne neuronske mreže (eng. Recurrent Neural Networks - RNN) predstavljaju arhitekturu mreža specijalizovanu za obradu sekvencijalnih podataka, poput rečenica prirodnog jezika i vremenskih serija. Sekvence nameću važnost redosleda zapažanja podataka, kako prilikom treniranja modela, tako i prilikom predviđanja. Mreže su konstruisane sa idejom da se modeluje zavisnost među instancama. Elementi ulazne sekvence se obrađuju u koracima, mreža ima skriveno stanje koje akumulira informaciju o elementiam sekvence obrađenim u prethodnim koracima, a parametri određuju na koji način se to stanje menja iz koraka u korak na osnovu prethodnog stanja i tekućih ulaza i kako se generiše izlaz u zavisnosti od tekućeg stanja.
 
@@ -190,6 +198,9 @@ Na kraju je potrebno da odlučimo šta će biti izlaz. Ova vrednost zavisi od st
 
 
 \section{Problem generisanja teksta}
+
+Generisanje prirodnog jezika (eng. Natural Language Generation - NLG) se intenzivno proučava zahvaljujući bitnim primenama koje ima, kao što su automatsko generisanje dijaloga, automatsko prevođenje jezika, sumarizacija teksta, generisanje opisa fotografija, i mnogih drugih. Poboljšanje kvaliteta automatskog generisanja teksta (u smislu sintakse i semantike) dolazi sa primenom tehnika mašinskog učenja. \cite{wang2018automatic}. 
+
 
 \section{Zaključak}
 \label{sec:zakljucak}

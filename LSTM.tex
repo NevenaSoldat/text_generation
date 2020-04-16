@@ -207,13 +207,13 @@ Generisanje teksta vrši se tako da za datu početnu sekvencu teksta mreža pred
 \begin{itemize}
     \item Preprocesiranje ulaznih podataka
     \item Kreiranje i treniranje modela
-    \item Generisanje teksta
+    \item Rezultati
 \end{itemize}
 
 
 \subsection{Preprocesiranje ulaznih podataka}
 
-Ulazni podaci su preuzeti iz baze podataka koja sadrži radnje filmova. Na slučajan način biramo 200 filmova. Različiti filmovi imaju različite i radnje, pa je potrebno da model prvo razume reči i kontekst svake radnje.
+Ulazni podaci su preuzeti iz baze podataka koja sadrži radnje filmova. Na slučajan način biramo 100 filmova. Različiti filmovi imaju različite i radnje, pa je potrebno da model prvo razume reči i kontekst svake radnje.
 
 Prvi korak u svim projektima koji podrazumevaju korišćenje reči prirodnog jezika je uklanjanje stop \footnote{ovo su uglavnom veznici, kao i reči koje su veoma učestale i koje iz tog razloga ometaju istraživanje} reči. Ipak, nama je cilj generisanje teksta koji će ličiti na povezanu priču, te nam je potrebno da sačuvamo sve reči. Naredni koraci u obradi teksta podrazumevaju:
 \begin{itemize}
@@ -225,20 +225,70 @@ Prvi korak u svim projektima koji podrazumevaju korišćenje reči prirodnog jez
 
 Dodatno, neuronske mreže ne mogu da rade sa rečima, te tekstualne podatke kodiramo kao brojeve koji će predstavljati ulaz, odnosno izlaz iz mreže. Tokenizer API iz biblioteke keras obavlja ovaj posao za nas. Naime, pozivom funkcije fit\_on\_texts obrađuje se tekst na gorenaveden način, i kreira se rečnik čiji su ključevi reči, a vrednosti brojevi koji su im dodeljeni.
 
+\subsubsection{Način predstavljanja teksta}
+
+Najjednostavniji način predstavljanja reči u metodama mašinskog učenja je vektor sa jednom jedinicom, tzv. 1-hot vektor. Ovim pristupom dobijaju se vektori velike dužine, a to u realnim primenama gde je vokabular koji se koristiri prilično velikih razmera nije optimalno. Drugi problem ovog pristupa je što algoritam nema nikakvo znanje o eventualnoj sličnosti između reči. 
+
+Pristup koji koristimo podrazumeva reprezentaciju reči u latentnom prostoru (eng. word embedding). Ovim pristupom vrši se redukcija dimenzionalnosti 1-hot reprezentacije u vektorski prostor čije koordinate nemaju direktno jasnog smisla čoveku (stoga i naziv latentni vektorski prostor). Dimenzionalnost tog vektorskog prostora zavisi od dalje primene, ali kreće se od nekoliko desetina do nekoliko hiljada.  Ključna razlika u odnosu na 1-hot reprezentaciju je što je ona gusta (eng. dense), dok je prethodna retka (eng. sparse). Retke reprezentacije imaju svojih prednosti kada je u pitanju vremenska složenost nekih algoritama, prvenstveno onih u kojima ima operacija sa retkim vektorima i matricama. S obzirom na prirodu i arhitekturu neuronskih mreža, ova prednost ne postoji - neuronskim mrežama pogodna je gusta predstava, odnosno gusti vektori osobina reči.
+
+Biblioteka Keras nam nudi Embedding sloj koji se može koristiti u ove svrhe. Sloj se inicijalizuje nasumičnim težinama, a zatim uči vektore svih reči pri treniranju skupa podataka. Sastoji se od tri argumenta: 
+\begin{itemize}
+    \item input\_dim - veličina rečnika koji se koristi 
+    \item output\_dim - dimenzija vektorskog prostora u kom su reči reprezentovane. Definiše dužinu vektora koji predstavljaju izlaz iz sloja za svaku reč. Može biti na primer 32, 100, ili čak više. Testiranjem treba proveriti šta najviše odgovara.
+    \item input\_length - dužina ulazne sekvence. Broj reči po dokumentu
+\end{itemize}
+
+Kako svi filmovi imaju opise različite dužine, radimo poravnanje. Uzimamo 200 reči iz svakog opisa. 
+
+
 \subsection{Kreiranje i treniranje modela}
 
-Za trening mreže koristimo tokenizovane reči, sakupljene iz sadržaja 200 filmova. Broj tokena iznosi 10806. Ulazni podaci su sekvence dužine 20 reči, a izlazni naredne reči. Mreža se sastoji iz ulaznog sloja (eng. Embedding layer), LSTM sloja, i izlaznog sloja. Izlazni sloj koristi softmax funkciju aktivacije. Funkcija gubitka je cross-entropy. Trening se izvršava u 100 epoha. Radi efikasnijeg treninga, koristimo tehniku slučajnog odbacivanja pojedinih veza (dropout) i Adam optimizator.
+Koristićemo dva LSTM sloja u mreži. Dodatni skriveni slojevi produbljuju mrežu, čime ovaj model više zaslužuje naziv tehnike dubokog učenja. Dubina mreže se generalno povezuje sa njihovim uspehom, pri primeni na razne probleme predviđanja. 
+
+"The success of deep neural networks is commonly attributed to the hierarchy that is introduced due to the several layers. Each layer processes some part of the task we wish to solve, and passes it on to the next. In this sense, the DNN can be seen as a processing pipeline, in which each layer solves a part of the task before passing it on to the next, until finally the last layer provides the output."
+
+— Training and Analyzing Deep Recurrent Neural Networks, 2013  \cite{NIPS2013_5166}\\
+\\
+U okviru rada ,,Speech Recognition with Deep Recurrent Neural Networks`` \cite{graves2013speech} zaključeno je da je dubina neuronske mreže bitnija od broja neurona u okviru datog sloja.
+\\
+\\
+Mreža sadrži:
+
+\begin{enumerate}
+    \item \textbf{Ulazni sloj}. Koristimo Embedding sloj radi pogodne reprezentacije reči. 
+    \item \textbf{Prvi LSTM sloj}. Sadrži nekoliko stotina skrivenih neurona. O uticaju broja neurona na uspešnost mreže biće reči kasnije.
+    \item \textbf{Sloj izbacivanja}. Radi sprečavanja pojave preprilagođavanja. Konvergencija je sporija, ali i kvalitetnija. Generalizacija je bolja zahvaljujući tome što se u treniranju izbegava to da jedan neuron bude sam odgovoran za neke primere, s obzirom na to da prisustvo neurona nije garantovano.
+    \item \textbf{Drugi LSTM sloj}. Isti kao prvi.
+    \item \textbf{Izlazni sloj}. Koristi softmax funkciju aktivacije, koja dodeljuje verovatnoću svakom mogućem izlazu. 
+\end{enumerate}
 
 
-\begin{figure}[htp]
-    \centering
-    \includegraphics[scale=0.6]{model.png}
-    \caption{Konfiguracija modela}
-    \label{fig:lstm10}
-\end{figure}
+\section{Rezultati}
 
+U ovom poglavlju analiziraćemo uspešnost rešavanja problema predikcije sledeće reči u rečenici. 
+
+\subsection{Brzina konvergencije}
+% TODO: GRAFIK TACNOST-EPOHE iz hist se iscrta
+
+\subsection{Optimalna veličina mreže}
+
+Jedno od pitanja koje nema definitivan odgovor kada god se radi o neuronskim mrežama je veličina mreže. Drugim rečima, pitanje je koliko skrivenih neurona staviti kako bi se izbalansiralo između dobrih performansi na trening delu podataka i dovoljno dobre generalizacije. Suština ove dileme leži u balansiranju između potprilagođavanja i preprilagođavanja. Naime, ukoliko skrivenim slojevima dodelimo previše neurona, tada će model veoma dobro naučiti podatke trening skupa, ali će varijansa biti prevelika. S druge strane, previše jednostavan model nije u stanju da nauči sve zakonitosti koje vladaju u skupu koji mu je dodeljen.
+
+Probaćemo nekoliko različitih veličina mreža i naći onu optimalnu. 
+
+% TODO: OVDE TABELA SA RAZLIČITIM BROJEM NEURONA i TAČNOST KOJU MODEL DAJE
+% 100, 300, 1000
 
 \section{Zaključak}
+
+Zahvaljujući tome što modeluju prelaze iz stanja u stanje, umesto direktne zavisnoti izlaza od celokupnog ulaza, rekurentne mreže su u stanju da predstave vrlo duboke strukture zavisnosti i da obrađuju sekvence promenljive, a velike dužine. Zahvaljujući LSTM jedinicama, takođe su u stanju da ublaže problem nestajućih gradijenata i da modeluju dugoročne zavisnosti. 
+
+Ipak, zbog kompleksnosti podataka koje modeluju i broja parametara koje LSTM jedinice imaju, nije ih lako obučavati (npr. jedna od poteškoća je haotično ponašanje u slučaju velikih apsolutnih vrednosti parametara). Poznato je da je njihovo obučavanje teže hardverski ubrzati zbog visokog obima memorijskog protoka i sekvencijalne prirode izračunavanja (dok hardversko ubrzanje počiva na paralelizaciji), što je ključ efikasnog obučavanja neuronskih mreža.
+
+\subsection{Dalja poboljšanja}
+
+Normalizacija podataka. CUDA. Manji broj ciljnih reči.
+
 \label{sec:zakljucak}
 
 
@@ -248,8 +298,5 @@ Za trening mreže koristimo tokenizovane reči, sakupljene iz sadržaja 200 film
 \appendix
 \bibliography{bibliografija.bib} 
 \bibliographystyle{plain}
-
-\appendix
-\section{Dodatak}
 
 \end{document}

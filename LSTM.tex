@@ -7,6 +7,9 @@
 \usepackage[utf8]{inputenc} % make weird characters work
 \usepackage{graphicx}
 
+\usepackage[table]{xcolor}
+
+
 \usepackage[english,serbian]{babel}
 %\usepackage[english,serbianc]{babel} %ukljuciti babel sa ovim opcijama, umesto gornjim, ukoliko se koristi cirilica
 
@@ -238,7 +241,18 @@ Biblioteka Keras nam nudi Embedding sloj koji se može koristiti u ove svrhe. Sl
     \item input\_length - dužina ulazne sekvence. Broj reči po dokumentu
 \end{itemize}
 
-Kako svi filmovi imaju opise različite dužine, radimo poravnanje. Uzimamo 200 reči iz svakog opisa. 
+Kako svi filmovi imaju opise različite dužine, radimo poravnanje. Uzimamo 200 reči iz svakog opisa. Sve opise spajamo u jedan korpus i na osnovu njega formiramo ulazne i izlazne podatke. Ulazni su sekvence dužine 20 reči, izlaz je naredna reč.
+
+Na slici \ref{fig:text_seq} prikazan je primer kreiranja ulaza i izlaza, gde je ulaz sekvenca dužine četiri reči, a izlaz je peta reč. Ulaz je uokviren plavom linijom, a izlaz je obojen u narandžasto.
+
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[scale=0.2]{text_seq.png}
+    \caption{Primer kreiranja ulaza i izlaza}
+    \label{fig:text_seq}
+\end{figure}
+
 
 
 \subsection{Kreiranje i treniranje modela}
@@ -269,6 +283,17 @@ U ovom poglavlju analiziraćemo uspešnost rešavanja problema predikcije slede�
 
 \subsection{Brzina konvergencije}
 % TODO: GRAFIK TACNOST-EPOHE iz hist se iscrta
+
+Slika \ref{fig:konv_20} prikazuje brzinu konvergencije prilikom treniranja modela koji ima po 100 neurona u svakom LSTM sloju, dužine trajanja 20 epoha.
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[scale = 0.5]{konvergencija_20_epoha_100_neurona.png}
+    \caption{Grafik konvergencije u 20 epoha}
+    \label{fig:konv_20}
+\end{figure}
+
+
 
 \subsection{Optimalna veličina mreže}
 

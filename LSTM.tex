@@ -279,7 +279,7 @@ Mreža sadrži:
 
 \section{Rezultati}
 
-U ovom poglavlju analiziraćemo uspešnost rešavanja problema predikcije sledeće reči u rečenici. 
+U ovom poglavlju analiziraćemo uspešnost rešavanja problema predikcije sledećih N reči u rečenici. Opisane su uočene ralike u ponasanju modela sa promenom broja neurona i broja epoha. 
 
 \subsection{Brzina konvergencije}
 % TODO: GRAFIK TACNOST-EPOHE iz hist se iscrta
@@ -288,7 +288,7 @@ Slika \ref{fig:konv_20} prikazuje brzinu konvergencije prilikom treniranja model
 
 \begin{figure}[htp]
     \centering
-    \includegraphics[scale = 0.5]{konv_20e100n.png}
+    \includegraphics[scale = 0.3]{konv_20e100n.png}
     \caption{Grafik konvergencije u 20 epoha}
     \label{fig:konv_20}
 \end{figure}
@@ -297,7 +297,7 @@ Na slici \ref{fig:konv_50} je prikazana brzina konvergencije tokom 50 epoha.
 
 \begin{figure}[htp]
     \centering
-    \includegraphics[scale = 0.5]{konv_50e100n.png}
+    \includegraphics[scale = 0.3]{konv_50e100n.png}
     \caption{Grafik konvergencije u 50 epoha}
     \label{fig:konv_50}
 \end{figure}
@@ -305,9 +305,9 @@ Na slici \ref{fig:konv_50} je prikazana brzina konvergencije tokom 50 epoha.
 
 Na slici \ref{fig:konv_100} je prikazana brzina konvergencije tokom 100 epoha.
 
-\begin{figure}[htp]
+\begin{figure}[!htp]
     \centering
-    \includegraphics[scale = 0.5]{konv_100e100n.png}
+    \includegraphics[scale = 0.3]{konv_100e100n.png}
     \caption{Grafik konvergencije u 100 epoha}
     \label{fig:konv_100}
 \end{figure}
@@ -317,9 +317,11 @@ Na slici \ref{fig:konv_100} je prikazana brzina konvergencije tokom 100 epoha.
 
 Jedno od pitanja koje nema definitivan odgovor kada god se radi o neuronskim mrežama je veličina mreže. Drugim rečima, pitanje je koliko skrivenih neurona staviti kako bi se izbalansiralo između dobrih performansi na trening delu podataka i dovoljno dobre generalizacije. Suština ove dileme leži u balansiranju između potprilagođavanja i preprilagođavanja. Naime, ukoliko skrivenim slojevima dodelimo previše neurona, tada će model veoma dobro naučiti podatke trening skupa, ali će varijansa biti prevelika. S druge strane, previše jednostavan model nije u stanju da nauči sve zakonitosti koje vladaju u skupu koji mu je dodeljen.
 
-Probaćemo nekoliko različitih veličina mreža i naći onu optimalnu.
+Broj epoha je parametar koji definiše koliko će puta algoritam učenja raditi sa čitavim skupom trening podataka. Jedna epoha znači da je svaki uzorak u skupu podataka za obuku imao mogućnost ažuriranja internih parametara modela. Sa porastom broja epoha smanjuje se greška modela. 
 
-\begin{table}[]
+Probaćemo nekoliko različitih veličina mreža i broja epoha i naći onu optimalnu.
+
+\begin{table}[!h]
     \centering
     \begin{tabular}{|| c c c c ||}
     \hline
@@ -337,64 +339,61 @@ Probaćemo nekoliko različitih veličina mreža i naći onu optimalnu.
 \end{table}
 
 
-Možemo primetiti da sa porastom broja neurona kao i broja epoha dobijamo bolji model. U tabeli \ref{tab:tabela1} vidimo da najveću tačnost ima model sa 100 epoha i 100 neurona kao i najmanji gubitak.
-Ovim pokazujemo da nas ne vodi samo porast broja neurona ka najboljem modelu. Potrebno je istraživati različite parametre kako bi dosli do modela koji će davati najsmislenije rezultate.
+Tabela \ref{tab:tabela1}  potvrđuje da porastom broja neurona i broja epoha dobijamo bolji model. Vidimo da najveću tačnost ima model sa 100 epoha i 100 neurona kao i najmanji gubitak u odnosu na ostale testirane modele.
+Ovim pokazujemo da nas ne vodi samo promena broja neurona ka najboljem modelu. Potrebno je istraživati različite parametre kako bi došli do najboljeg, odnosno, onog koji će davati najsmislenije rezultate.
 
 Rezultat za model koji ima 100 epoha i 100 neurona prikazan je slikom ispod  \ref{fig:Rezultat100e100n}. Ulazni tekst je 'The movie' i vraćeno je 50 narednih reči koje generiše naš model.
 
 \begin{figure}[htp]
     \centering
-    \includegraphics[scale=0.3]{tekst_100e100n.png}
+    \includegraphics[scale=0.25]{tekst_100e100n.png}
     \caption{Rezultat 100e100n}
     \label{fig:Rezultat100e100n}
 \end{figure}
 
-Model vraća smislene reči za dati ulaz. U nastavku prikazane su slike za ostale varijacije modela kako bi čitalac imao više osećaja o razlikama. Notacija 100e100n govori o broj epoha i broju neurona modela.
+Model vraća smislene reči za dati ulaz. U nastavku prikazane su slike za ostale varijacije modela kako bi čitalac imao više osećaja o razlikama. Notacija 100e100n označava da je reč o modelu koji ima 100 neurona u LSTM sloju i da je treniran kroz 100 epoha.
 
-\begin{figure}[h]
+\begin{figure}[!ht]
     \centering
-    \includegraphics[scale=0.3]{tekst_20e100n.png}
+    \includegraphics[scale=0.25]{tekst_20e100n.png}
     \caption{Rezultat 20e100n}
     \label{fig:Rezultat20e100n}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[!ht]
     \centering
-    \includegraphics[scale=0.3]{tekst_50e100n.png}
+    \includegraphics[scale=0.25]{tekst_50e100n.png}
     \caption{Rezultat 50e100n}
     \label{fig:Rezultat50e100n}
 \end{figure}
-\begin{figure}[h]
+\begin{figure}[!ht]
     \centering
-    \includegraphics[scale=0.3]{tekst_20e200n.png}
+    \includegraphics[scale=0.25]{tekst_20e200n.png}
     \caption{Rezultat 20e200n}
     \label{fig:Rezultat20e200n}
 \end{figure}
-\begin{figure}[h]
+\begin{figure}[!ht]
     \centering
-    \includegraphics[scale=0.3]{tekst_50e200n.png}
+    \includegraphics[scale=0.25]{tekst_50e200n.png}
     \caption{Rezultat 50e200n}
     \label{fig:Rezultat50e200n}
 \end{figure}
 
-
-
 \section{Zaključak}
 
-Zahvaljujući tome što modeluju prelaze iz stanja u stanje, umesto direktne zavisnoti izlaza od celokupnog ulaza, rekurentne mreže su u stanju da predstave vrlo duboke strukture zavisnosti i da obrađuju sekvence promenljive, a velike dužine. Zahvaljujući LSTM jedinicama, takođe su u stanju da ublaže problem nestajućih gradijenata i da modeluju dugoročne zavisnosti. 
+Zahvaljujući tome što modeluju prelaze iz stanja u stanje, umesto direktne zavisnosti izlaza od celokupnog ulaza, rekurentne mreže su u stanju da predstave vrlo duboke strukture zavisnosti i da obrađuju sekvence promenljive, a velike dužine. Zahvaljujući LSTM jedinicama, takođe su u stanju da ublaže problem nestajućih gradijenata i da modeluju dugoročne zavisnosti. 
 
 Ipak, zbog kompleksnosti podataka koje modeluju i broja parametara koje LSTM jedinice imaju, nije ih lako obučavati (npr. jedna od poteškoća je haotično ponašanje u slučaju velikih apsolutnih vrednosti parametara). Poznato je da je njihovo obučavanje teže hardverski ubrzati zbog visokog obima memorijskog protoka i sekvencijalne prirode izračunavanja (dok hardversko ubrzanje počiva na paralelizaciji), što je ključ efikasnog obučavanja neuronskih mreža.
 
-\subsection{Dalja poboljšanja}
+\subsection{Dalji razvoj}
 
 Svakako, prikazano rešenje nije najbolje. Postoje razni načini kojima se LSTM neuronska mreža moze poboljšati za ovaj problem a neki od saveta za dalji rad dati su u nastavku.  
 \begin{itemize}
     \item Povećajte broj epoha na više stotina, ili čak stotine stotina.
     \item Eksperimentišite sa broj neurona kao i brojem slojeva mreže.
-    \item Promenite stanje LSTM slojeva u stateful kako biste održavali stanje u serijama.
     \item Razmisliti o slojevima napustanja, odnosno, zaboravljanja i procentima za iste.
+    \item Menjati parametre, uočiti kako utiču na rezultat i jedni na druge.
 \end{itemize}
-Normalizacija podataka. CUDA. Manji broj ciljnih reči.
 
 \label{sec:zakljucak}
 

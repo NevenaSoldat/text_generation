@@ -88,7 +88,7 @@ Mnogi radovi bave se automatskim generisanjem teksta. Rad koji je sličan našem
 LSTM mreže koriste se za razne probleme nad sekvencijalnim podacima. Tako imamo radove koji se bave automatskim generisanjem reči pesama \cite{potash2015ghostwriter}, ili čak automatskim komponovanjem muzike \cite{choi2016text}.
 
 \section{Rekurentne neuronske mreže}
-Rekurentne neuronske mreže (eng. Recurrent Neural Networks - RNN) predstavljaju arhitekturu mreža specijalizovanu za obradu sekvencijalnih podataka, poput rečenica prirodnog jezika i vremenskih serija. Sekvence nameću važnost redosleda zapažanja podataka, kako prilikom treniranja modela, tako i prilikom predviđanja. Mreže su konstruisane sa idejom da se modeluje zavisnost među instancama. Elementi ulazne sekvence se obrađuju u koracima, mreža ima skriveno stanje koje akumulira informaciju o elementiam sekvence obrađenim u prethodnim koracima, a parametri određuju na koji način se to stanje menja iz koraka u korak na osnovu prethodnog stanja i tekućih ulaza i kako se generiše izlaz u zavisnosti od tekućeg stanja.
+Rekurentne neuronske mreže (eng. Recurrent Neural Networks - RNN) predstavljaju arhitekturu mreža specijalizovanu za obradu sekvencijalnih podataka, poput rečenica prirodnog jezika i vremenskih serija. Sekvence nameću važnost redosleda zapažanja podataka, kako prilikom treniranja modela, tako i prilikom predviđanja. Mreže su konstruisane sa idejom da se modeluje zavisnost među instancama. Elementi ulazne sekvence se obrađuju u koracima, mreža ima skriveno stanje koje akumulira informaciju o elementima sekvence obrađenim u prethodnim koracima, a parametri određuju na koji način se to stanje menja iz koraka u korak na osnovu prethodnog stanja i tekućih ulaza i kako se generiše izlaz u zavisnosti od tekućeg stanja.
 
 "Learning of sequential data continues to be a fundamental task and a challenge in
 pattern recognition and machine learning. Applications involving sequential data
@@ -288,7 +288,7 @@ Slika \ref{fig:konv_20} prikazuje brzinu konvergencije prilikom treniranja model
 
 \begin{figure}[htp]
     \centering
-    \includegraphics[scale = 0.5]{konvergencija_20_epoha_100_neurona.png}
+    \includegraphics[scale = 0.5]{konv_20e100n.png}
     \caption{Grafik konvergencije u 20 epoha}
     \label{fig:konv_20}
 \end{figure}
@@ -313,14 +313,71 @@ Na slici \ref{fig:konv_100} je prikazana brzina konvergencije tokom 100 epoha.
 \end{figure}
 
 
-\subsection{Optimalna veličina mreže}
+\subsection{Veličina mreže i broj epoha}
 
 Jedno od pitanja koje nema definitivan odgovor kada god se radi o neuronskim mrežama je veličina mreže. Drugim rečima, pitanje je koliko skrivenih neurona staviti kako bi se izbalansiralo između dobrih performansi na trening delu podataka i dovoljno dobre generalizacije. Suština ove dileme leži u balansiranju između potprilagođavanja i preprilagođavanja. Naime, ukoliko skrivenim slojevima dodelimo previše neurona, tada će model veoma dobro naučiti podatke trening skupa, ali će varijansa biti prevelika. S druge strane, previše jednostavan model nije u stanju da nauči sve zakonitosti koje vladaju u skupu koji mu je dodeljen.
 
-Probaćemo nekoliko različitih veličina mreža i naći onu optimalnu. 
+Probaćemo nekoliko različitih veličina mreža i naći onu optimalnu.
 
-% TODO: OVDE TABELA SA RAZLIČITIM BROJEM NEURONA i TAČNOST KOJU MODEL DAJE
-% 100, 300, 1000
+\begin{table}[]
+    \centering
+    \begin{tabular}{|| c c c c ||}
+    \hline
+    Broj epoha & Broj neurona & Tacnost & Gubitak \\
+    \hline\hline
+     20 & 100 & 27.38 & 5.11 \\
+     50 & 100 & 38.18 & 4.27 \\
+     100 & 100 & 43.88 & 3.88 \\
+     20 & 200 & 27.80 & 4.83 \\
+     50 & 200 & 38.78 & 3.96 \\
+     \hline
+    \end{tabular}
+    \caption{Varijacije modela}
+    \label{tab:tabela1}
+\end{table}
+
+
+Možemo primetiti da sa porastom broja neurona kao i broja epoha dobijamo bolji model. U tabeli \ref{tab:tabela1} vidimo da najveću tačnost ima model sa 100 epoha i 100 neurona kao i najmanji gubitak.
+Ovim pokazujemo da nas ne vodi samo porast broja neurona ka najboljem modelu. Potrebno je istraživati različite parametre kako bi dosli do modela koji će davati najsmislenije rezultate.
+
+Rezultat za model koji ima 100 epoha i 100 neurona prikazan je slikom ispod  \ref{fig:Rezultat100e100n}. Ulazni tekst je 'The movie' i vraćeno je 50 narednih reči koje generiše naš model.
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[scale=0.3]{tekst_100e100n.png}
+    \caption{Rezultat 100e100n}
+    \label{fig:Rezultat100e100n}
+\end{figure}
+
+Model vraća smislene reči za dati ulaz. U nastavku prikazane su slike za ostale varijacije modela kako bi čitalac imao više osećaja o razlikama. Notacija 100e100n govori o broj epoha i broju neurona modela.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.3]{tekst_20e100n.png}
+    \caption{Rezultat 20e100n}
+    \label{fig:Rezultat20e100n}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.3]{tekst_50e100n.png}
+    \caption{Rezultat 50e100n}
+    \label{fig:Rezultat50e100n}
+\end{figure}
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.3]{tekst_20e200n.png}
+    \caption{Rezultat 20e200n}
+    \label{fig:Rezultat20e200n}
+\end{figure}
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.3]{tekst_50e200n.png}
+    \caption{Rezultat 50e200n}
+    \label{fig:Rezultat50e200n}
+\end{figure}
+
+
 
 \section{Zaključak}
 
@@ -330,6 +387,13 @@ Ipak, zbog kompleksnosti podataka koje modeluju i broja parametara koje LSTM jed
 
 \subsection{Dalja poboljšanja}
 
+Svakako, prikazano rešenje nije najbolje. Postoje razni načini kojima se LSTM neuronska mreža moze poboljšati za ovaj problem a neki od saveta za dalji rad dati su u nastavku.  
+\begin{itemize}
+    \item Povećajte broj epoha na više stotina, ili čak stotine stotina.
+    \item Eksperimentišite sa broj neurona kao i brojem slojeva mreže.
+    \item Promenite stanje LSTM slojeva u stateful kako biste održavali stanje u serijama.
+    \item Razmisliti o slojevima napustanja, odnosno, zaboravljanja i procentima za iste.
+\end{itemize}
 Normalizacija podataka. CUDA. Manji broj ciljnih reči.
 
 \label{sec:zakljucak}

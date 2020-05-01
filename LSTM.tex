@@ -241,7 +241,7 @@ Biblioteka Keras nam nudi Embedding sloj koji se može koristiti u ove svrhe. Sl
     \item input\_length - dužina ulazne sekvence. Broj reči po dokumentu
 \end{itemize}
 
-Kako svi filmovi imaju opise različite dužine, radimo poravnanje. Uzimamo 200 reči iz svakog opisa. Sve opise spajamo u jedan korpus i na osnovu njega formiramo ulazne i izlazne podatke. Ulazni su sekvence dužine 20 reči, izlaz je naredna reč.
+Kako svi filmovi imaju opise različite dužine, radimo poravnanje. Uzimamo 200 reči iz svakog opisa. Sve opise spajamo u jedan korpus i na osnovu njega formiramo ulazne i izlazne podatke. Ulazni su sekvence dužine 5 reči, izlaz je naredna reč.
 
 Na slici \ref{fig:text_seq} prikazan je primer kreiranja ulaza i izlaza, gde je ulaz sekvenca dužine četiri reči, a izlaz je peta reč. Ulaz je uokviren plavom linijom, a izlaz je obojen u narandžasto.
 
@@ -272,7 +272,7 @@ Mreža sadrži:
     \item \textbf{Ulazni sloj}. Koristimo Embedding sloj radi pogodne reprezentacije reči. 
     \item \textbf{Prvi LSTM sloj}. Sadrži nekoliko stotina skrivenih neurona. O uticaju broja neurona na uspešnost mreže biće reči kasnije.
     \item \textbf{Sloj izbacivanja}. Radi sprečavanja pojave preprilagođavanja. Konvergencija je sporija, ali i kvalitetnija. Generalizacija je bolja zahvaljujući tome što se u treniranju izbegava to da jedan neuron bude sam odgovoran za neke primere, s obzirom na to da prisustvo neurona nije garantovano.
-    \item \textbf{Drugi LSTM sloj}. Isti kao prvi.
+    \item \textbf{Drugi LSTM sloj}
     \item \textbf{Izlazni sloj}. Koristi softmax funkciju aktivacije, koja dodeljuje verovatnoću svakom mogućem izlazu. 
 \end{enumerate}
 
@@ -281,37 +281,8 @@ Mreža sadrži:
 
 U ovom poglavlju analiziraćemo uspešnost rešavanja problema predikcije sledećih N reči u rečenici. Opisane su uočene ralike u ponasanju modela sa promenom broja neurona i broja epoha. 
 
-\subsection{Brzina konvergencije}
-% TODO: GRAFIK TACNOST-EPOHE iz hist se iscrta
-
-Slika \ref{fig:konv_20} prikazuje brzinu konvergencije prilikom treniranja modela koji ima po 100 neurona u svakom LSTM sloju, dužine trajanja 20 epoha.
-
-\begin{figure}[htp]
-    \centering
-    \includegraphics[scale = 0.3]{konv_20e100n.png}
-    \caption{Grafik konvergencije u 20 epoha}
-    \label{fig:konv_20}
-\end{figure}
-
-Na slici \ref{fig:konv_50} je prikazana brzina konvergencije tokom 50 epoha.
-
-\begin{figure}[htp]
-    \centering
-    \includegraphics[scale = 0.3]{konv_50e100n.png}
-    \caption{Grafik konvergencije u 50 epoha}
-    \label{fig:konv_50}
-\end{figure}
-
-
-Na slici \ref{fig:konv_100} je prikazana brzina konvergencije tokom 100 epoha.
-
-\begin{figure}[!htp]
-    \centering
-    \includegraphics[scale = 0.3]{konv_100e100n.png}
-    \caption{Grafik konvergencije u 100 epoha}
-    \label{fig:konv_100}
-\end{figure}
-
+Napomena: Bolja preciznost je dobijena ograničavanjem broja ciljnih reči na 5000, tako da Tokenizer uzima samo 5000 najfrekventnijih reči.
+Ono sto je poboljsalo model jeste manji broj ulaznih reči. Naime, losiji rezultati se dobijaju kada koristimo 20 ulaznih reči a gde je 21. izlazna nego kada koristimo 5 ulaznih gde je 6. izlazna.
 
 \subsection{Veličina mreže i broj epoha}
 
@@ -319,7 +290,7 @@ Jedno od pitanja koje nema definitivan odgovor kada god se radi o neuronskim mre
 
 Broj epoha je parametar koji definiše koliko će puta algoritam učenja raditi sa čitavim skupom trening podataka. Jedna epoha znači da je svaki uzorak u skupu podataka za obuku imao mogućnost ažuriranja internih parametara modela. Sa porastom broja epoha smanjuje se greška modela. 
 
-Probaćemo nekoliko različitih veličina mreža i broja epoha i naći onu optimalnu.
+ U nastavku je prikazana tabela \ref{tab:tabela1} u kojoj se može videti ponašanje modela menjanjem broja epoha i broja neurona u LSTM slojevima, odnosno, greška i tačnost modela za test podatke.
 
 \begin{table}[!h]
     \centering
@@ -327,11 +298,14 @@ Probaćemo nekoliko različitih veličina mreža i broja epoha i naći onu optim
     \hline
     Broj epoha & Broj neurona & Tacnost & Gubitak \\
     \hline\hline
-     20 & 100 & 27.38 & 5.11 \\
-     50 & 100 & 38.18 & 4.27 \\
-     100 & 100 & 43.88 & 3.88 \\
-     20 & 200 & 27.80 & 4.83 \\
-     50 & 200 & 38.78 & 3.96 \\
+     20 & 100/100 & 21.53 & 6.68 \\ 
+     50 & 100/100 & 20.30 & 7.98 \\
+     100 & 100/100 & 20.22 & 10.95 \\
+     300 & 100/100 & 20.23 & 14.64 \\
+     20 & 100/200 & 21.43 & 7.13 \\
+     50 & 100/200 & 19.80 & 8.92 \\
+     100 & 100/200 & 19.68 & 10.77 \\
+     300 & 100/200 & 20.22 & 14.02 \\
      \hline
     \end{tabular}
     \caption{Varijacije modela}
@@ -339,58 +313,72 @@ Probaćemo nekoliko različitih veličina mreža i broja epoha i naći onu optim
 \end{table}
 
 
-Tabela \ref{tab:tabela1}  potvrđuje da porastom broja neurona i broja epoha dobijamo bolji model. Vidimo da najveću tačnost ima model sa 100 epoha i 100 neurona kao i najmanji gubitak u odnosu na ostale testirane modele.
-Ovim pokazujemo da nas ne vodi samo promena broja neurona ka najboljem modelu. Potrebno je istraživati različite parametre kako bi došli do najboljeg, odnosno, onog koji će davati najsmislenije rezultate.
+Mozemo primetiti da tačnost nema prevelika odstupanja za prikazane modele ali da se gubitak više razlikuje.
 
-Rezultat za model koji ima 100 epoha i 100 neurona prikazan je slikom ispod  \ref{fig:Rezultat100e100n}. Ulazni tekst je 'The movie' i vraćeno je 50 narednih reči koje generiše naš model.
+Problem generisanja testa je suviše kompleksan. Ocenjivanje modela nije najpreciznije merama prikazanim u tabeli \ref{tab:tabela1} a koje se inače koriste u mašinskom učenju. Ocenu ovakvih modela, za ovaj problem, najbolje daje sam čovek. U nastavku je prikazan tekst izgenerisan datim modelima.
+Ulazni tekst je 'The movie' i vraćeno je 50 narednih reči.
 
 \begin{figure}[htp]
     \centering
-    \includegraphics[scale=0.3]{tekst_100e100n.png}
-    \caption{Rezultat 100e100n}
-    \label{fig:Rezultat100e100n}
-\end{figure}
-
-Model vraća smislene reči za dati ulaz. U nastavku prikazane su slike za ostale varijacije modela kako bi čitalac imao više osećaja o razlikama. Notacija 100e100n označava da je reč o modelu koji ima 100 neurona u LSTM sloju i da je treniran kroz 100 epoha.
-
-\begin{figure}[!ht]
-    \centering
-    \includegraphics[scale=0.3]{tekst_20e100n.png}
-    \caption{Rezultat 20e100n}
+    \includegraphics[scale=0.3]{tekst20e100nx2.png}
+    \caption{Rezultat 20e100nx2}
     \label{fig:Rezultat20e100n}
 \end{figure}
 
-\begin{figure}[!ht]
+Model koji je pokazao u tabeli dobre rezultate za tacnost i gubitak ipak ne daje najbolje generisan tekst. 20 epoha za dva sloja od 100 neurona ipak nije dovoljno da izgeneriše nesto razumljivo.
+
+Ipak, drasticnim povećanjem broja epoha dobijamo bolje generisan tekst iako je gubitak prikazan u tabeli veći.
+
+\begin{figure}[htp]
     \centering
-    \includegraphics[scale=0.3]{tekst_50e100n.png}
-    \caption{Rezultat 50e100n}
-    \label{fig:Rezultat50e100n}
+    \includegraphics[scale=0.3]{tekst100e100nx2.png}
+    \caption{Rezultat 10e100nx2}
+    \label{fig:Rezultat100e100n}
 \end{figure}
-\begin{figure}[!ht]
+
+\begin{figure}[!h]
     \centering
-    \includegraphics[scale=0.3]{tekst_20e200n.png}
-    \caption{Rezultat 20e200n}
-    \label{fig:Rezultat20e200n}
+    \includegraphics[scale=0.3]{tekst300e100nx2.png}
+    \caption{Rezultat 300e100nx2}
+    \label{fig:Rezultat300e100n}
 \end{figure}
-\begin{figure}[!ht]
+
+Dalje, prikazani su rezultati modela koji ima malo vise neurona, u prvom sloju 100 a u drugom 200 za iste brojeve epoha. 20 epoha daje bolje rezultate u ovom slučaju. 
+
+\begin{figure}[!h]
     \centering
-    \includegraphics[scale=0.3]{tekst_50e200n.png}
-    \caption{Rezultat 50e200n}
-    \label{fig:Rezultat50e200n}
+    \includegraphics[scale=0.3]{tekst_20epoha.png}
+    \caption{Rezultat 20e100n200n}
+    \label{fig:Rezultat20e100n200n}
+\end{figure}
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.3]{tekst_50epoha.png}
+    \caption{Rezultat 50e100n200n}
+    \label{fig:Rezultat50e100n200n}
+\end{figure}
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.3]{tekst_300epoha.png}
+    \caption{Rezultat 300e100n200n}
+    \label{fig:Rezultat300e100n200n}
 \end{figure}
 
 \section{Zaključak}
 
-Zahvaljujući tome što modeluju prelaze iz stanja u stanje, umesto direktne zavisnosti izlaza od celokupnog ulaza, rekurentne mreže su u stanju da predstave vrlo duboke strukture zavisnosti i da obrađuju sekvence promenljive, a velike dužine. Zahvaljujući LSTM jedinicama, takođe su u stanju da ublaže problem nestajućih gradijenata i da modeluju dugoročne zavisnosti. 
+Zahvaljujući tome što modeluju prelaze iz stanja u stanje, umesto direktne zavisnosti izlaza od celokupnog ulaza, rekurentne mreže su u stanju da predstave vrlo duboke strukture zavisnosti i da obrađuju sekvence promenljive, a velike dužine. Iako nismo dosli do baš najboljeg modela u ovom radu, uspeli smo da prikazemo razumljive izlaze za zadatu sekvencu reči. Svakako, ovaj model se moze unaprediti tako da bude još bolji.
 
-Ipak, zbog kompleksnosti podataka koje modeluju i broja parametara koje LSTM jedinice imaju, nije ih lako obučavati (npr. jedna od poteškoća je haotično ponašanje u slučaju velikih apsolutnih vrednosti parametara). Poznato je da je njihovo obučavanje teže hardverski ubrzati zbog visokog obima memorijskog protoka i sekvencijalne prirode izračunavanja (dok hardversko ubrzanje počiva na paralelizaciji), što je ključ efikasnog obučavanja neuronskih mreža.
+Zbog kompleksnosti podataka koje modeluju i broja parametara koje LSTM jedinice imaju, nije ih lako obučavati. Poznato je da je njihovo obučavanje teže hardverski ubrzati zbog visokog obima memorijskog protoka i sekvencijalne prirode izračunavanja.
 
 \subsection{Dalji razvoj}
+Ono što posebno treba istaknuti jeste da je radjeno
+generisanje teksta nad opisima filmova koji imaju različitu tematiku što povećava kompleksnost opisanog problema.
+Postoje razni načini kojima se rešenje ovog problema može unaprediti. Par saveta:  
 
-Svakako, prikazano rešenje nije najbolje. Postoje razni načini kojima se LSTM neuronska mreža moze poboljšati za ovaj problem a neki od saveta za dalji rad dati su u nastavku.  
 \begin{itemize}
-    \item Povećajte broj epoha na više stotina, ili čak stotine stotina.
-    \item Eksperimentišite sa broj neurona kao i brojem slojeva mreže.
+    \item Dobra analiza podataka sa kojima se radi.
+    \item Eksperimentišite sa brojem neurona kao i brojem slojeva mreže.
     \item Razmisliti o slojevima napustanja, odnosno, zaboravljanja i procentima za iste.
     \item Menjati parametre, uočiti kako utiču na rezultat i jedni na druge.
 \end{itemize}

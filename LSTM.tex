@@ -36,7 +36,7 @@
   escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
   extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
   firstnumber=1000,                % start line enumeration with line 1000
-  frame=single,	                   % adds a frame around the code
+  frame=single,                    % adds a frame around the code
   keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
   keywordstyle=\color{blue},       % keyword style
   language=Python,                 % the language of the code
@@ -50,7 +50,7 @@
   showtabs=false,                  % show tabs within strings adding particular underscores
   stepnumber=2,                    % the step between two line-numbers. If it's 1, each line will be numbered
   stringstyle=\color{mymauve},     % string literal style
-  tabsize=2,	                   % sets default tabsize to 2 spaces
+  tabsize=2,                     % sets default tabsize to 2 spaces
   title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
 }
 
@@ -216,7 +216,7 @@ Generisanje teksta vrši se tako da za datu početnu sekvencu teksta mreža pred
 
 \subsection{Preprocesiranje ulaznih podataka}
 
-Ulazni podaci su preuzeti iz baze podataka koja sadrži radnje filmova. Na slučajan način biramo 100 filmova. Različiti filmovi imaju različite i radnje, pa je potrebno da model prvo razume reči i kontekst svake radnje.
+Ulazni podaci su preuzeti iz baze podataka koja sadrži radnje filmova. Na slučajan način biramo 150 filmova. Različiti filmovi imaju različite i radnje, pa je potrebno da model prvo razume reči i kontekst svake radnje.
 
 Prvi korak u svim projektima koji podrazumevaju korišćenje reči prirodnog jezika je uklanjanje stop \footnote{ovo su uglavnom veznici, kao i reči koje su veoma učestale i koje iz tog razloga ometaju istraživanje} reči. Ipak, nama je cilj generisanje teksta koji će ličiti na povezanu priču, te nam je potrebno da sačuvamo sve reči. Naredni koraci u obradi teksta podrazumevaju:
 \begin{itemize}
@@ -241,9 +241,9 @@ Biblioteka Keras nam nudi Embedding sloj koji se može koristiti u ove svrhe. Sl
     \item input\_length - dužina ulazne sekvence. Broj reči po dokumentu
 \end{itemize}
 
-Kako svi filmovi imaju opise različite dužine, radimo poravnanje. Uzimamo 200 reči iz svakog opisa. Sve opise spajamo u jedan korpus i na osnovu njega formiramo ulazne i izlazne podatke. Ulazni su sekvence dužine 5 reči, izlaz je naredna reč.
+Kako svi filmovi imaju opise različite dužine, radimo poravnanje. Uzimamo 200 reči iz svakog opisa. Sve opise spajamo u jedan korpus i na osnovu njega formiramo ulazne i izlazne podatke. Ulazni su sekvence dužine 4 reči, izlaz je naredna reč.
 
-Na slici \ref{fig:text_seq} prikazan je primer kreiranja ulaza i izlaza, gde je ulaz sekvenca dužine četiri reči, a izlaz je peta reč. Ulaz je uokviren plavom linijom, a izlaz je obojen u narandžasto.
+Na slici \ref{fig:text_seq} prikazan je primer kreiranja ulaza i izlaza nad rečenicom: "The man is walking down the street.". Ulaz je uokviren plavom linijom, a izlaz je obojen u narandžasto.
 
 
 \begin{figure}[htp]
@@ -252,7 +252,6 @@ Na slici \ref{fig:text_seq} prikazan je primer kreiranja ulaza i izlaza, gde je 
     \caption{Primer kreiranja ulaza i izlaza}
     \label{fig:text_seq}
 \end{figure}
-
 
 
 \subsection{Kreiranje i treniranje modela}
@@ -271,41 +270,52 @@ Mreža sadrži:
 \begin{enumerate}
     \item \textbf{Ulazni sloj}. Koristimo Embedding sloj radi pogodne reprezentacije reči. 
     \item \textbf{Prvi LSTM sloj}. Sadrži nekoliko stotina skrivenih neurona. O uticaju broja neurona na uspešnost mreže biće reči kasnije.
-    \item \textbf{Sloj izbacivanja}. Radi sprečavanja pojave preprilagođavanja. Konvergencija je sporija, ali i kvalitetnija. Generalizacija je bolja zahvaljujući tome što se u treniranju izbegava to da jedan neuron bude sam odgovoran za neke primere, s obzirom na to da prisustvo neurona nije garantovano.
+    \item \textbf{Prvi sloj izbacivanja}. Radi sprečavanja pojave preprilagođavanja. Konvergencija je sporija, ali i kvalitetnija. Generalizacija je bolja zahvaljujući tome što se u treniranju izbegava to da jedan neuron bude sam odgovoran za neke primere, s obzirom na to da prisustvo neurona nije garantovano.
     \item \textbf{Drugi LSTM sloj}
+    \item \textbf{Drugi sloj izbacivanja}
     \item \textbf{Izlazni sloj}. Koristi softmax funkciju aktivacije, koja dodeljuje verovatnoću svakom mogućem izlazu. 
 \end{enumerate}
+
+U praksi se često posle svakog LSTM sloja dodaje jedan sloj izbacivanja kako bi se sprečilo preprilagođavanje. Takođe,
+uobičajena vrednost parametra za sloj izbacivanja je oko 20\%. Konfiguraciju mreže možemo videti na slici \ref{fig:mreža}.
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[scale=0.5]{2sloja_mreza.png}
+    \caption{Kod za kreiranje mreže}
+    \label{fig:mreža}
+\end{figure}
+
 
 
 \section{Rezultati}
 
-U ovom poglavlju analiziraćemo uspešnost rešavanja problema predikcije sledećih N reči u rečenici. Opisane su uočene ralike u ponasanju modela sa promenom broja neurona i broja epoha. 
+U ovom poglavlju analiziraćemo uspešnost rešavanja problema predikcije sledećih N reči u rečenici. Opisane su uočene razlike u ponašanju modela sa promenom broja neurona i broja epoha. 
 
 Napomena: Bolja preciznost je dobijena ograničavanjem broja ciljnih reči na 5000, tako da Tokenizer uzima samo 5000 najfrekventnijih reči.
-Ono sto je poboljsalo model jeste manji broj ulaznih reči. Naime, losiji rezultati se dobijaju kada koristimo 20 ulaznih reči a gde je 21. izlazna nego kada koristimo 5 ulaznih gde je 6. izlazna.
 
 \subsection{Veličina mreže i broj epoha}
 
 Jedno od pitanja koje nema definitivan odgovor kada god se radi o neuronskim mrežama je veličina mreže. Drugim rečima, pitanje je koliko skrivenih neurona staviti kako bi se izbalansiralo između dobrih performansi na trening delu podataka i dovoljno dobre generalizacije. Suština ove dileme leži u balansiranju između potprilagođavanja i preprilagođavanja. Naime, ukoliko skrivenim slojevima dodelimo previše neurona, tada će model veoma dobro naučiti podatke trening skupa, ali će varijansa biti prevelika. S druge strane, previše jednostavan model nije u stanju da nauči sve zakonitosti koje vladaju u skupu koji mu je dodeljen.
 
-Broj epoha je parametar koji definiše koliko će puta algoritam učenja raditi sa čitavim skupom trening podataka. Jedna epoha znači da je svaki uzorak u skupu podataka za obuku imao mogućnost ažuriranja internih parametara modela. Sa porastom broja epoha smanjuje se greška modela. 
+Broj epoha je parametar koji definiše koliko će puta algoritam učenja raditi sa čitavim skupom trening podataka. Jedna epoha znači da je svaki uzorak u skupu podataka za obuku imao mogućnost ažuriranja internih parametara modela.
 
- U nastavku je prikazana tabela \ref{tab:tabela1} u kojoj se može videti ponašanje modela menjanjem broja epoha i broja neurona u LSTM slojevima, odnosno, greška i tačnost modela za test podatke.
+ U nastavku je prikazana tabela (\ref{tab:tabela1}) u kojoj se može videti ponašanje modela sa menjanjem broja epoha i broja neurona u LSTM slojevima, odnosno, greška i tačnost modela za test podatke.
 
 \begin{table}[!h]
     \centering
     \begin{tabular}{|| c c c c ||}
     \hline
-    Broj epoha & Broj neurona & Tacnost & Gubitak \\
+    \rowcolor{lightgray!60}Broj epoha & Broj neurona & Tačnost & Gubitak \\ 
     \hline\hline
-     20 & 100/100 & 21.53 & 6.68 \\ 
-     50 & 100/100 & 20.30 & 7.98 \\
-     100 & 100/100 & 20.22 & 10.95 \\
-     300 & 100/100 & 20.23 & 14.64 \\
-     20 & 100/200 & 21.43 & 7.13 \\
-     50 & 100/200 & 19.80 & 8.92 \\
-     100 & 100/200 & 19.68 & 10.77 \\
-     300 & 100/200 & 20.22 & 14.02 \\
+    \rowcolor{yellow!40} 20 & 100/100 & 21.53 & 6.68 \\ 
+    \rowcolor{yellow!60} 50 & 100/100 & 20.30 & 7.98 \\
+    \rowcolor{yellow!80} 100 & 100/100 & 20.22 & 10.95 \\
+    \rowcolor{yellow} 300 & 100/100 & 20.23 & 14.64 \\
+    \rowcolor{orange!40} 20 & 100/200 & 21.43 & 7.13 \\
+    \rowcolor{orange!60} 50 & 100/200 & 19.80 & 8.92 \\
+    \rowcolor{orange!80} 100 & 100/200 & 19.68 & 10.77 \\
+    \rowcolor{orange} 300 & 100/200 & 20.22 & 14.02 \\
      \hline
     \end{tabular}
     \caption{Varijacije modela}
@@ -313,57 +323,129 @@ Broj epoha je parametar koji definiše koliko će puta algoritam učenja raditi 
 \end{table}
 
 
-Mozemo primetiti da tačnost nema prevelika odstupanja za prikazane modele ali da se gubitak više razlikuje.
+Možemo primetiti da tačnost nema prevelika odstupanja za prikazane modele, ali da se gubitak više razlikuje.
 
-Problem generisanja testa je suviše kompleksan. Ocenjivanje modela nije najpreciznije merama prikazanim u tabeli \ref{tab:tabela1} a koje se inače koriste u mašinskom učenju. Ocenu ovakvih modela, za ovaj problem, najbolje daje sam čovek. U nastavku je prikazan tekst izgenerisan datim modelima.
-Ulazni tekst je 'The movie' i vraćeno je 50 narednih reči.
+Problem generisanja teksta je suviše kompleksan. Ocenjivanje modela nije najpreciznije merama prikazanim u tabeli \ref{tab:tabela1}, a koje se inače koriste u mašinskom učenju. Ocenu ovakvih modela najbolje daje sam čovek. Naime, za sve probleme generisanja teksta, ljudski faktor ima veliku ulogu. Određen broj ljudi ocenjuje osobine teksta kao što su sintaksna ispravnost, fluidnost teksta, semantika, i druge. Preciznost predviđanja reči nije nam najbitniji faktor. U nastavku je prikazan tekst izgenerisan datim modelima.
+Ulazni tekst je "The movie is about", i generišemo 20 narednih reči. 
+
+Na slikama \ref{fig:Rezultat20e100n}, \ref{fig:Rezultat50e100n}, \ref{fig:Rezultat100e100n} i \ref{fig:Rezultat300e100n} dati su rezultati za model
+sa manjim brojem memorijskih ćelija, odnosno sa po 100 neurona u svakom LSTM sloju.
 
 \begin{figure}[htp]
     \centering
     \includegraphics[scale=0.3]{tekst20e100nx2.png}
-    \caption{Rezultat 20e100nx2}
+    \caption{Rezultat za 20 epoha}
     \label{fig:Rezultat20e100n}
 \end{figure}
 
-Model koji je pokazao u tabeli dobre rezultate za tacnost i gubitak ipak ne daje najbolje generisan tekst. 20 epoha za dva sloja od 100 neurona ipak nije dovoljno da izgeneriše nesto razumljivo.
+Model koji je pokazao u tabeli dobre rezultate za tačnost i gubitak ipak ne daje najbolje generisan tekst. Treniranje kroz 20 epoha za dva sloja od 100 neurona ipak nije dovoljno da izgeneriše nešto razumljivo.
 
-Ipak, drasticnim povećanjem broja epoha dobijamo bolje generisan tekst iako je gubitak prikazan u tabeli veći.
+Ipak, drastičnim povećanjem broja epoha dobijamo bolje generisan tekst, iako je gubitak prikazan u tabeli veći.
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[scale=0.3]{tekst50e100nx2.png}
+    \caption{Rezultat za 50 epoha}
+    \label{fig:Rezultat50e100n}
+\end{figure}
 
 \begin{figure}[htp]
     \centering
     \includegraphics[scale=0.3]{tekst100e100nx2.png}
-    \caption{Rezultat 10e100nx2}
+    \caption{Rezultat za 100 epoha}
     \label{fig:Rezultat100e100n}
 \end{figure}
 
 \begin{figure}[!h]
     \centering
     \includegraphics[scale=0.3]{tekst300e100nx2.png}
-    \caption{Rezultat 300e100nx2}
+    \caption{Rezultat za 300 epoha}
     \label{fig:Rezultat300e100n}
 \end{figure}
 
-Dalje, prikazani su rezultati modela koji ima malo vise neurona, u prvom sloju 100 a u drugom 200 za iste brojeve epoha. 20 epoha daje bolje rezultate u ovom slučaju. 
+Dalje, prikazani su rezultati modela koji ima malo više neurona, u prvom sloju 100, a u drugom 200 za iste brojeve epoha (slike \ref{fig:Rezultat20e100n200n}, \ref{fig:Rezultat50e100n200n}, \ref{fig:Rezultat100e100n200n} i \ref{fig:Rezultat300e100n200n}). I ovde možemo primetiti da se kroz manji broj epoha javlja određeno ponavljanje reči. Što više treniramo model, to je tekst povezaniji i smisleniji. Ipak, treba paziti da ne dođe do preprilagođavanja modela trening podacima. 
 
 \begin{figure}[!h]
     \centering
-    \includegraphics[scale=0.3]{tekst_20epoha.png}
-    \caption{Rezultat 20e100n200n}
+    \includegraphics[scale=0.3]{2sloja_tekst20epoha.png}
+    \caption{Rezultat kroz 20 epoha}
     \label{fig:Rezultat20e100n200n}
 \end{figure}
 \begin{figure}[!h]
     \centering
-    \includegraphics[scale=0.3]{tekst_50epoha.png}
-    \caption{Rezultat 50e100n200n}
+    \includegraphics[scale=0.3]{2sloja_tekst50epoha.png}
+    \caption{Rezultat kroz 50 epoha}
     \label{fig:Rezultat50e100n200n}
+\end{figure}
+
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.3]{2sloja_tekst100epoha.png}
+    \caption{Rezultat kroz 100 epoha}
+    \label{fig:Rezultat100e100n200n}
 \end{figure}
 
 \begin{figure}[!h]
     \centering
-    \includegraphics[scale=0.3]{tekst_300epoha.png}
-    \caption{Rezultat 300e100n200n}
+    \includegraphics[scale=0.3]{2sloja_tekst300epoha.png}
+    \caption{Rezultat kroz 300 epoha}
     \label{fig:Rezultat300e100n200n}
 \end{figure}
+
+Testiran je i model sa tri LSTM sloja, sa 50, 200 i 250 memorijskih ćelija redom (slika \ref{fig:mreza}).
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.3]{mreza.png}
+    \caption{Konfiguracija modela sa 3 LSTM sloja}
+    \label{fig:mreza}
+\end{figure}
+Dobijeni rezultati su prikazani u tabeli \ref{tab:tabela2}. Preciznost kroz epohe opet se ne razlikuje mnogo u odnosu na prethodne modele. Međutim, greška ovog modela nešto je manja za veće vrednosti broja epoha. Bitno je da greška bude manja kako bismo imali sigurniji model. Kada je preciznost ista, a greška se povećava znači da model, iako dobro predviđa postaje nesigurniji. To može biti znak preprilagođavanja. Odavde možemo da zaključimo da se model sa tri LSTM sloja ponaša bolje od modela sa manje slojeva.
+
+\begin{table}[!h]
+    \centering
+    \begin{tabular}{|| c c c c ||}
+    \hline
+    \rowcolor{lightgray!60}Broj epoha & Broj neurona & Tačnost & Gubitak \\
+    \hline\hline
+    \rowcolor{orange!40} 20 & 50/200/250 & 21.08 & 7.12 \\ 
+    \rowcolor{orange!60} 50 & 50/200/250 & 19.08 & 8.88\\
+    \rowcolor{orange!80} 100 & 50/200/250 & 20.55 & 10.27 \\
+    \rowcolor{orange} 300 & 50/200/250 & 19.35 & 13.64 \\
+     \hline
+    \end{tabular}
+    \caption{Prikaz rezultata za model sa 3 LSTM sloja}
+    \label{tab:tabela2}
+\end{table}
+
+Na slikama \ref{fig:tekst_20}, \ref{fig:tekst_50}, \ref{fig:tekst_100} i \ref{fig:tekst_300} dat je izlaz iz troslojnog modela.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.3]{3sloja_tekst_20epoha.png}
+    \caption{Rezultat kroz 20 epoha}
+    \label{fig:tekst_20}
+\end{figure}
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.3]{3sloja_tekst_50epoha.png}
+    \caption{Rezultat kroz 50 epoha}
+    \label{fig:tekst_50}
+\end{figure}
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.3]{3sloja_tekst_100epoha.png}
+    \caption{Rezultat kroz 100 epoha}
+    \label{fig:tekst_100}
+\end{figure}
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.3]{3sloja_tekst_300epoha.png}
+    \caption{Rezultat kroz 300 epoha}
+    \label{fig:tekst_300}
+\end{figure}
+
+Kao što je bio slučaj i sa prethodnim modelima, kroz više epoha tekst je smisleniji. Međutim ono što još možemo primetiti u odnosu na modele sa dva LSTM sloja je da kod ovog modela već kroz 20 epoha dobijamo bolje izlaze, odnosno nema ponavljanja sekvenci teksta. 
 
 \section{Zaključak}
 
